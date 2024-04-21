@@ -10,13 +10,14 @@ class TextFielWidget extends StatelessWidget {
       this.prefixIcon,
       this.suffixIcon,
       this.width,
-      this.hintPassword});
+      this.hintPassword,
+      this.onChanged});
   TextEditingController? controller = TextEditingController();
   String? hintText;
   bool? isReadonly;
   bool? hintPassword;
   double? hieght;
-
+  void Function(String)? onChanged;
   double? width;
   IconData? prefixIcon;
   IconButton? suffixIcon;
@@ -40,6 +41,7 @@ class TextFielWidget extends StatelessWidget {
               suffixIcon: suffixIcon,
               border: InputBorder.none,
               hintText: hintText ?? 'Enter some text'),
+          onChanged: onChanged,
         ),
       ),
     );

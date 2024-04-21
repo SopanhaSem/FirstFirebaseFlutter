@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_setup/src/firebase_auth_implementation/firebase_auth_service.dart';
-import 'package:firebase_setup/src/view/auth/homescreen.dart';
 import 'package:firebase_setup/src/view/auth/login_screen.dart';
 import 'package:firebase_setup/src/widget/textfield_widget.dart';
 import 'package:flutter/cupertino.dart';
