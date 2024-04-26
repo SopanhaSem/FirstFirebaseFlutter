@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_setup/src/widget/textfield_widget.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AddEditCourseScreen extends StatefulWidget {
   AddEditCourseScreen({super.key, this.courseData, this.refId});
@@ -12,6 +16,8 @@ class AddEditCourseScreen extends StatefulWidget {
 }
 
 class _AddEditCourseScreenState extends State<AddEditCourseScreen> {
+  File? imagFile;
+
   CollectionReference dataRef =
       FirebaseFirestore.instance.collection("Courses");
   TextEditingController courseNameController = TextEditingController();
@@ -88,14 +94,53 @@ class _AddEditCourseScreenState extends State<AddEditCourseScreen> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
-            TextFielWidget(
-              hintText: 'Link Image',
-              controller: courseImageLinkController,
-              onChanged: (link) {
-                setState(() {
-                  courseImageLinkController.text = link;
-                });
-              },
+            Row(
+              children: [
+                TextFielWidget(
+                  isReadonly: true,
+                  width: 300,
+                  hintText: 'Link Image',
+                  controller: courseImageLinkController,
+                  onChanged: (link) {
+                    setState(() {
+                      courseImageLinkController.text = link;
+                    });
+                  },
+                ),
+                FloatingActionButton(
+                    onPressed: () async {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            content: SizedBox(
+                              height: 140,
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      openCamera();
+                                    },
+                                    title: const Text('Camera'),
+                                  ),
+                                  const Divider(),
+                                  ListTile(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      openGallary();
+                                    },
+                                    title: const Text('Gallary'),
+                                  )
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    child: const Icon(Icons.image_rounded))
+              ],
             ),
             if (courseImageLinkController.text.isNotEmpty)
               Padding(
@@ -164,5 +209,44 @@ class _AddEditCourseScreenState extends State<AddEditCourseScreen> {
         ),
       ),
     );
+  }
+
+  void getDownloadImage() async {
+    final storageRef = FirebaseStorage.instance.ref();
+    const mainPath = 'images';
+    String imageName = DateTime.now().microsecondsSinceEpoch.toString();
+    // Upload Image
+    storageRef
+        .child(mainPath)
+        .child("/$imageName.png")
+        .putFile(File(imagFile!.path))
+        .then((p0) async {
+      FirebaseStorage.instance
+          .ref()
+          .child(mainPath)
+          .child("$imageName.png")
+          .getDownloadURL()
+          .then((value) {
+        setState(() {
+          courseImageLinkController.text = value;
+        });
+      });
+    });
+  }
+
+  void openGallary() async {
+    var getImage = await ImagePicker().pickImage(source: ImageSource.gallery);
+    setState(() {
+      imagFile = File(getImage!.path);
+    });
+    getDownloadImage();
+  }
+
+  void openCamera() async {
+    var getImage = await ImagePicker().pickImage(source: ImageSource.camera);
+    setState(() {
+      imagFile = File(getImage!.path);
+    });
+    getDownloadImage();
   }
 }
